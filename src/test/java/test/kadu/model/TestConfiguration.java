@@ -3,8 +3,6 @@ package test.kadu.model;
 import com.kadu.helper.OperationSystem;
 import com.kadu.model.Configuration;
 import com.kadu.model.Directory;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
@@ -30,7 +28,7 @@ public class TestConfiguration
     }
 
     @Test
-    public void testAddDirectory() throws UnsupportedEncodingException, NoSuchAlgorithmException
+    public void testAddDirectory()
     {
         Configuration config = new Configuration();
         assertEquals(0, config.getDirectories().size());
@@ -54,7 +52,7 @@ public class TestConfiguration
     }
 
     @Test
-    public void testSetDirectories() throws UnsupportedEncodingException, NoSuchAlgorithmException
+    public void testSetDirectories()
     {
         ArrayList<Directory> directories = new ArrayList();
 
@@ -77,7 +75,7 @@ public class TestConfiguration
     }
 
     @Test
-    public void testValidateDirectory() throws UnsupportedEncodingException, NoSuchAlgorithmException
+    public void testValidateDirectory()
     {
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
@@ -95,7 +93,7 @@ public class TestConfiguration
     }
 
     @Test
-    public void testRemoveDirectory() throws UnsupportedEncodingException, NoSuchAlgorithmException
+    public void testRemoveDirectory()
     {
         Configuration config = new Configuration();
 

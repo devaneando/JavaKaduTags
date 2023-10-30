@@ -4,18 +4,26 @@ import com.kadu.validator.ValidFolder;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class Directory
 {
 
-    private static String calculateHash(String message) throws NoSuchAlgorithmException, UnsupportedEncodingException
+    private static String calculateHash(String message)
     {
-        MessageDigest digest = MessageDigest.getInstance("md5");
-        byte[] hashedBytes = digest.digest(message.getBytes("UTF-8"));
+        try {
+            MessageDigest digest = MessageDigest.getInstance("md5");
+            byte[] hashedBytes = digest.digest(message.getBytes("UTF-8"));
 
-        return convertByteArrayToHexString(hashedBytes);
+            return convertByteArrayToHexString(hashedBytes);
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
+            Logger.getLogger(Directory.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return "";
     }
 
     private static String convertByteArrayToHexString(byte[] arrayBytes)
@@ -48,7 +56,7 @@ public class Directory
         return path;
     }
 
-    public void setPath(String path) throws UnsupportedEncodingException, NoSuchAlgorithmException
+    public void setPath(String path)
     {
         this.path = path.trim();
         this.hash = calculateHash(this.path);
