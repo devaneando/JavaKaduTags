@@ -39,7 +39,7 @@ public class TestDirectory
     }
 
     @Test
-    public void testNotExistentFolder() throws UnsupportedEncodingException, NoSuchAlgorithmException
+    public void testNotExistentFolder()
     {
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 

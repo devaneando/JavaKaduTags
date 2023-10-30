@@ -36,7 +36,7 @@ public class Configuration
 
     public boolean addDirectory(Directory directory)
     {
-        if (this.directories.contains(directory)) {
+        if (this.contains(directory)) {
             return false;
         }
 
@@ -48,7 +48,7 @@ public class Configuration
 
     public boolean removeDirectory(Directory directory)
     {
-        if (!this.directories.contains(directory)) {
+        if (!this.contains(directory)) {
             return false;
         }
 
@@ -56,6 +56,22 @@ public class Configuration
         this.sort();
 
         return true;
+    }
+
+    public boolean contains(Directory directory)
+    {
+        return -1 != this.indexOf(directory);
+    }
+
+    public int indexOf(Directory directory)
+    {
+        for (int a = 0; a < this.directories.size(); a++) {
+            if (directory.getHash().equals(this.directories.get(a).getHash())) {
+                return a;
+            }
+        }
+
+        return -1;
     }
 
     private void sort()
