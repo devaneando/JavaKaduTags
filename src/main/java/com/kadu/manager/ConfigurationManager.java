@@ -17,36 +17,28 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
-public class ConfigurationManager
-{
+public class ConfigurationManager {
 
     private static final String FILE_NAME = ".kaduTags";
 
     private String configFile;
     private Configuration config;
-    private Validator validator;
+    private final Validator validator;
 
-    public ConfigurationManager() throws IOException
-    {
+    public ConfigurationManager() throws IOException {
         if (null == this.configFile) {
-            String[] elements = {
-                OperationSystem.homeFolder(),
-                FILE_NAME
-            };
-            this.configFile = OperationSystem.concatenate(elements);
+            this.configFile = OperationSystem.concatenate(OperationSystem.homeFolder(), FILE_NAME);
         }
 
         this.loadConfig();
         this.validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
-    public ArrayList<Directory> getDirectories()
-    {
+    public ArrayList<Directory> getDirectories() {
         return this.config.getDirectories();
     }
 
-    public ArrayList addDirectory(String path) throws IOException
-    {
+    public ArrayList addDirectory(String path) throws IOException {
         Directory dir = new Directory();
         dir.setPath(path);
 
@@ -69,8 +61,23 @@ public class ConfigurationManager
         return errors;
     }
 
-    private void saveConfig() throws IOException
-    {
+    public ArrayList removeDirectory(String path) throws IOException {
+        Directory dir = new Directory();
+        dir.setPath(path);
+
+        ArrayList errors = new ArrayList();
+        if (!this.config.removeDirectory(dir)) {
+            errors.add("The directory \"" + dir.getPath() + "\" was not removed!");
+
+            return errors;
+        }
+
+        this.saveConfig();
+
+        return errors;
+    }
+
+    private void saveConfig() throws IOException {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.setPrettyPrinting().create();
         String json = gson.toJson(this.config);
@@ -81,8 +88,7 @@ public class ConfigurationManager
         }
     }
 
-    private void loadConfig() throws IOException
-    {
+    private void loadConfig() throws IOException {
         File file = new File(this.configFile);
         if (!file.exists()) {
             this.config = new Configuration();

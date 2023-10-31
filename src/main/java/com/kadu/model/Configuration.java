@@ -4,25 +4,21 @@ import java.util.ArrayList;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class Configuration
-{
+public class Configuration {
 
     @NotNull
     @Valid
     private final ArrayList<Directory> directories;
 
-    public Configuration()
-    {
+    public Configuration() {
         this.directories = new ArrayList<>();
     }
 
-    public ArrayList<Directory> getDirectories()
-    {
+    public ArrayList<Directory> getDirectories() {
         return this.directories;
     }
 
-    public boolean setDirectories(ArrayList<Directory> directories)
-    {
+    public boolean setDirectories(ArrayList<Directory> directories) {
         boolean wasOk = true;
 
         for (Directory directory : directories) {
@@ -34,37 +30,33 @@ public class Configuration
         return wasOk;
     }
 
-    public boolean addDirectory(Directory directory)
-    {
+    public boolean addDirectory(Directory directory) {
         if (this.contains(directory)) {
             return false;
         }
 
         this.directories.add(directory);
-        this.sort();
+        this.directories.sort((Directory first, Directory second) -> first.getPath().compareTo(second.getPath()));
 
         return true;
     }
 
-    public boolean removeDirectory(Directory directory)
-    {
-        if (!this.contains(directory)) {
+    public boolean removeDirectory(Directory directory) {
+        int index = this.indexOf(directory);
+        if (-1 == index) {
             return false;
         }
 
-        this.directories.remove(directory);
-        this.sort();
+        this.directories.remove(index);
 
         return true;
     }
 
-    public boolean contains(Directory directory)
-    {
+    public boolean contains(Directory directory) {
         return -1 != this.indexOf(directory);
     }
 
-    public int indexOf(Directory directory)
-    {
+    public int indexOf(Directory directory) {
         for (int a = 0; a < this.directories.size(); a++) {
             if (directory.getHash().equals(this.directories.get(a).getHash())) {
                 return a;
@@ -72,10 +64,5 @@ public class Configuration
         }
 
         return -1;
-    }
-
-    private void sort()
-    {
-        this.directories.sort((Directory first, Directory second) -> first.getPath().compareTo(second.getPath()));
     }
 }
