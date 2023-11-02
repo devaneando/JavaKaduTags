@@ -2,10 +2,11 @@ package com.kadu.manager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.kadu.exception.ConfigurationReadFailure;
+import com.kadu.exception.ConfigurationWriteFailure;
 import com.kadu.helper.OperationSystem;
 import com.kadu.model.Configuration;
 import com.kadu.model.Directory;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -25,7 +28,7 @@ public class ConfigurationManager {
     private Configuration config;
     private final Validator validator;
 
-    public ConfigurationManager() throws IOException {
+    public ConfigurationManager() throws ConfigurationReadFailure, ConfigurationWriteFailure {
         if (null == this.configFile) {
             this.configFile = OperationSystem.concatenate(OperationSystem.homeFolder(), FILE_NAME);
         }
@@ -38,7 +41,7 @@ public class ConfigurationManager {
         return this.config.getDirectories();
     }
 
-    public ArrayList addDirectory(String path) throws IOException {
+    public ArrayList addDirectory(String path) throws ConfigurationWriteFailure {
         Directory dir = new Directory();
         dir.setPath(path);
 
@@ -61,7 +64,7 @@ public class ConfigurationManager {
         return errors;
     }
 
-    public ArrayList removeDirectory(String path) throws IOException {
+    public ArrayList removeDirectory(String path) throws ConfigurationWriteFailure {
         Directory dir = new Directory();
         dir.setPath(path);
 
@@ -77,18 +80,28 @@ public class ConfigurationManager {
         return errors;
     }
 
-    private void saveConfig() throws IOException {
+    private void saveConfig() throws ConfigurationWriteFailure {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.setPrettyPrinting().create();
         String json = gson.toJson(this.config);
 
-        FileWriter file = new FileWriter(this.configFile);
-        try (BufferedWriter buffer = new BufferedWriter(file)) {
-            buffer.write(json);
+        File existingFile = new File(this.configFile);
+        if (existingFile.exists()) {
+            existingFile.delete();
+        }
+
+        try {
+            FileWriter file = new FileWriter(this.configFile);
+            file.write(json);
+            file.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationManager.class.getName()).log(Level.SEVERE, null, ex);
+            throw new ConfigurationWriteFailure();
         }
     }
 
-    private void loadConfig() throws IOException {
+    private void loadConfig() throws ConfigurationReadFailure, ConfigurationWriteFailure {
+
         File file = new File(this.configFile);
         if (!file.exists()) {
             this.config = new Configuration();
@@ -98,7 +111,19 @@ public class ConfigurationManager {
         }
 
         Path path = Path.of(this.configFile);
-        String json = Files.readString(path);
+        String json;
+        try {
+            json = Files.readString(path);
+            if (json.isEmpty()) {
+                this.config = new Configuration();
+                this.saveConfig();
+
+                return;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ConfigurationManager.class.getName()).log(Level.SEVERE, null, ex);
+            throw new ConfigurationReadFailure();
+        }
         this.config = new Gson().fromJson(json, Configuration.class);
     }
 }

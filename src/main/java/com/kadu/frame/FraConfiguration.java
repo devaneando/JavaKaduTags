@@ -1,5 +1,7 @@
 package com.kadu.frame;
 
+import com.kadu.exception.ConfigurationReadFailure;
+import com.kadu.exception.ConfigurationWriteFailure;
 import com.kadu.helper.Color;
 import com.kadu.manager.ConfigurationManager;
 import com.kadu.model.Directory;
@@ -24,15 +26,18 @@ public class FraConfiguration extends AbstractKaduFrame {
     private void loadData() {
         try {
             this.configManager = new ConfigurationManager();
-        } catch (IOException ex) {
+        } catch (ConfigurationReadFailure | ConfigurationWriteFailure ex) {
             Logger.getLogger(FraConfiguration.class.getName()).log(Level.SEVERE, null, ex);
+            this.updateMessage(this.lblMessages, Color.COLOR_ERROR, ex.getMessage());
+
+            return;
         }
+
         DefaultListModel model = new DefaultListModel();
         for (Directory dir : this.configManager.getDirectories()) {
             model.addElement(dir.getPath());
         }
         this.lstDirectories.setModel(model);
-
     }
 
     /**
@@ -134,6 +139,7 @@ public class FraConfiguration extends AbstractKaduFrame {
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int returnVal = chooser.showDialog(this, "OK");
 
+        this.lblMessages.setVisible(false);
         if (JFileChooser.APPROVE_OPTION == returnVal) {
             try {
                 this.displayErrors(
@@ -141,13 +147,16 @@ public class FraConfiguration extends AbstractKaduFrame {
                         this.configManager.addDirectory(chooser.getSelectedFile().getPath()),
                         "Directory added."
                 );
-            } catch (IOException ex) {
+            } catch (ConfigurationWriteFailure ex) {
                 Logger.getLogger(FraConfiguration.class.getName()).log(Level.SEVERE, null, ex);
                 this.updateMessage(this.lblMessages, Color.COLOR_ERROR, ex.getMessage());
+
+                return;
             }
+
             this.loadData();
         } else {
-            this.lblMessages.setVisible(false);
+
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
@@ -171,10 +180,13 @@ public class FraConfiguration extends AbstractKaduFrame {
                     this.configManager.removeDirectory(this.lstDirectories.getSelectedValue()),
                     "Directory removed."
             );
-        } catch (IOException ex) {
+        } catch (ConfigurationWriteFailure ex) {
             Logger.getLogger(FraConfiguration.class.getName()).log(Level.SEVERE, null, ex);
             this.updateMessage(lblMessages, Color.COLOR_ERROR, ex.getMessage());
+
+            return;
         }
+
         this.loadData();
     }//GEN-LAST:event_btnRemoveActionPerformed
 
@@ -211,8 +223,6 @@ public class FraConfiguration extends AbstractKaduFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
-            private ConfigurationManager configManager;
-
             public void run() {
                 try {
                     new FraConfiguration().setVisible(true);
