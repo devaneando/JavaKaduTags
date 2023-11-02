@@ -32,4 +32,6 @@ public interface Md5Model {
     }
 
     public String getHash();
+
+    public String getValue();
 }

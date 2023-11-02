@@ -1,5 +1,6 @@
 package com.kadu.helper;
 
+import com.kadu.model.Directory;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,6 +71,15 @@ public class OperationSystem {
         String[] elements = {
             first,
             second
+        };
+
+        return concatenate(elements);
+    }
+
+    public static String concatenate(Directory directory, String file) {
+        String[] elements = {
+            directory.getPath(),
+            file
         };
 
         return concatenate(elements);

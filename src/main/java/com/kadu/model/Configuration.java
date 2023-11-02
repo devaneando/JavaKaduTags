@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class Configuration {
+public class Configuration extends AbstractTagsCollectionModel {
 
     @NotNull
     @Valid
     private final ArrayList<Directory> directories;
 
     public Configuration() {
+        super();
         this.directories = new ArrayList<>();
     }
 
@@ -36,7 +37,7 @@ public class Configuration {
         }
 
         this.directories.add(directory);
-        this.directories.sort((Directory first, Directory second) -> first.getPath().compareTo(second.getPath()));
+        this.directories.sort((Directory first, Directory second) -> first.getValue().compareTo(second.getValue()));
 
         return true;
     }

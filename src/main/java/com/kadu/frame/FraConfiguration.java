@@ -2,13 +2,11 @@ package com.kadu.frame;
 
 import com.kadu.exception.ConfigurationReadFailure;
 import com.kadu.exception.ConfigurationWriteFailure;
-import com.kadu.helper.Color;
+import com.kadu.exception.TagsWriteFailure;
 import com.kadu.manager.ConfigurationManager;
+import com.kadu.manager.TagManager;
 import com.kadu.model.Directory;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -16,9 +14,11 @@ import javax.swing.JOptionPane;
 public class FraConfiguration extends AbstractKaduFrame {
 
     private ConfigurationManager configManager;
+    private TagManager tagManager;
 
-    public FraConfiguration() throws IOException {
+    public FraConfiguration() {
         initComponents();
+        this.setLocation();
         this.loadData();
         this.lblMessages.setVisible(false);
     }
@@ -26,9 +26,9 @@ public class FraConfiguration extends AbstractKaduFrame {
     private void loadData() {
         try {
             this.configManager = new ConfigurationManager();
+            this.tagManager = new TagManager();
         } catch (ConfigurationReadFailure | ConfigurationWriteFailure ex) {
-            Logger.getLogger(FraConfiguration.class.getName()).log(Level.SEVERE, null, ex);
-            this.updateMessage(this.lblMessages, Color.COLOR_ERROR, ex.getMessage());
+            this.showError(ex, lblMessages);
 
             return;
         }
@@ -56,7 +56,6 @@ public class FraConfiguration extends AbstractKaduFrame {
         btnRemove = new javax.swing.JButton();
         btnClose = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Kadu Tags");
         setIconImage(getIconImage());
         setUndecorated(true);
@@ -79,6 +78,7 @@ public class FraConfiguration extends AbstractKaduFrame {
         jScrollPane1.setViewportView(lstDirectories);
 
         lblMessages.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        lblMessages.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/32/exit.png"))); // NOI18N
         lblMessages.setText("jLabel1");
         lblMessages.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
@@ -91,7 +91,6 @@ public class FraConfiguration extends AbstractKaduFrame {
         });
 
         btnClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/32/back.png"))); // NOI18N
-        btnClose.setText("Back");
         btnClose.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCloseActionPerformed(evt);
@@ -112,7 +111,7 @@ public class FraConfiguration extends AbstractKaduFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnRemove)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnClose)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -141,22 +140,25 @@ public class FraConfiguration extends AbstractKaduFrame {
 
         this.lblMessages.setVisible(false);
         if (JFileChooser.APPROVE_OPTION == returnVal) {
+            String selectedDir = chooser.getSelectedFile().getPath();
             try {
-                this.displayErrors(
-                        lblMessages,
-                        this.configManager.addDirectory(chooser.getSelectedFile().getPath()),
-                        "Directory added."
-                );
+                this.handleErrors(lblMessages, this.configManager.addDirectory(selectedDir), "Directory added.");
             } catch (ConfigurationWriteFailure ex) {
-                Logger.getLogger(FraConfiguration.class.getName()).log(Level.SEVERE, null, ex);
-                this.updateMessage(this.lblMessages, Color.COLOR_ERROR, ex.getMessage());
+                this.showError(ex, lblMessages);
+
+                return;
+            }
+
+            Directory directory = new Directory(selectedDir);
+            try {
+                this.tagManager.createFile(directory);
+            } catch (TagsWriteFailure ex) {
+                this.showError(ex, lblMessages);
 
                 return;
             }
 
             this.loadData();
-        } else {
-
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
@@ -164,7 +166,7 @@ public class FraConfiguration extends AbstractKaduFrame {
 
         this.lblMessages.setVisible(false);
         if (null == this.lstDirectories.getSelectedValue()) {
-            this.updateMessage(this.lblMessages, Color.COLOR_WARNING, "No directory selected!");
+            this.showWarning(lblMessages, "No directory selected!");
 
             return;
         }
@@ -175,14 +177,9 @@ public class FraConfiguration extends AbstractKaduFrame {
         }
 
         try {
-            this.displayErrors(
-                    lblMessages,
-                    this.configManager.removeDirectory(this.lstDirectories.getSelectedValue()),
-                    "Directory removed."
-            );
+            this.handleErrors(lblMessages, this.configManager.removeDirectory(this.lstDirectories.getSelectedValue()), "Directory removed.");
         } catch (ConfigurationWriteFailure ex) {
-            Logger.getLogger(FraConfiguration.class.getName()).log(Level.SEVERE, null, ex);
-            this.updateMessage(lblMessages, Color.COLOR_ERROR, ex.getMessage());
+            this.showError(ex, lblMessages);
 
             return;
         }
@@ -224,11 +221,7 @@ public class FraConfiguration extends AbstractKaduFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                try {
-                    new FraConfiguration().setVisible(true);
-                } catch (IOException ex) {
-                    Logger.getLogger(FraConfiguration.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                new FraConfiguration().setVisible(true);
             }
         });
     }

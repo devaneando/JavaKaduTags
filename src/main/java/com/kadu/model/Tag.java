@@ -29,4 +29,9 @@ public class Tag extends AbstractMd5Model implements Md5Model {
     public void setDescription(String description) {
         this.description = null != description ? description.trim() : null;
     }
+
+    @Override
+    public String getValue() {
+        return this.name;
+    }
 }

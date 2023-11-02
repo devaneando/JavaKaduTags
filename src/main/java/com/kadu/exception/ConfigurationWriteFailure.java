@@ -1,8 +1,19 @@
 package com.kadu.exception;
 
-public class ConfigurationWriteFailure extends AbstractIOFailure {
+public class ConfigurationWriteFailure extends Exception {
 
-    protected static String getDefaultErrorMessage() {
-        return "Something bad happened while reading the configuration file!";
+    String originalErrorMessage;
+
+    public ConfigurationWriteFailure() {
+        super("Something bad happened while reading the configuration file!");
+    }
+
+    public ConfigurationWriteFailure(String errorMessage) {
+        super(errorMessage.trim());
+    }
+
+    public ConfigurationWriteFailure(String errorMessage, String originalErrorMessage) {
+        super(errorMessage.trim());
+        this.originalErrorMessage = originalErrorMessage.trim();
     }
 }

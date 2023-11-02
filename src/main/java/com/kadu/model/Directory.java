@@ -11,6 +11,17 @@ public class Directory extends AbstractMd5Model implements Md5Model {
     @ValidFolder()
     private String path;
 
+    public Directory() {
+        // Do nothing
+    }
+
+    public Directory(String path) {
+        if (!path.isEmpty()) {
+            this.path = path.trim();
+            this.setHash(path);
+        }
+    }
+
     public String getPath() {
         return this.path;
     }
@@ -18,5 +29,10 @@ public class Directory extends AbstractMd5Model implements Md5Model {
     public void setPath(String path) {
         this.path = path.trim();
         this.setHash(path);
+    }
+
+    @Override
+    public String getValue() {
+        return this.path;
     }
 }

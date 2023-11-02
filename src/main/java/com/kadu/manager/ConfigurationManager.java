@@ -91,7 +91,7 @@ public class ConfigurationManager {
         }
 
         try {
-            FileWriter file = new FileWriter(this.configFile);
+            var file = new FileWriter(this.configFile);
             file.write(json);
             file.close();
         } catch (IOException ex) {
@@ -125,5 +125,15 @@ public class ConfigurationManager {
             throw new ConfigurationReadFailure();
         }
         this.config = new Gson().fromJson(json, Configuration.class);
+    }
+
+    private void loadTags() {
+        for (Directory directory : this.config.getDirectories()) {
+            String path = OperationSystem.concatenate(directory, FILE_NAME);
+            File file = new File(path);
+            if (!file.exists()) {
+                return;
+            }
+        }
     }
 }

@@ -1,7 +1,9 @@
 package com.kadu.frame;
 
 import com.kadu.helper.Color;
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -27,42 +29,48 @@ abstract public class AbstractKaduFrame extends JFrame {
         return null;
     }
 
-    protected void updateMessage(JLabel label, String foreground, String message) {
-        ArrayList list = new ArrayList();
-        list.add(message);
-        this.updateMessage(label, foreground, null, list);
+    protected void setLocation() {
+        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
     }
 
-    protected void updateMessage(JLabel label, String foreground, ArrayList<String> message) {
-        this.updateMessage(label, foreground, null, message);
-    }
+    protected void showError(Exception ex, JLabel label) {
+        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
 
-    protected void updateMessage(JLabel label, String foreground, String background, String message) {
-        ArrayList list = new ArrayList();
-        list.add(message);
-        this.updateMessage(label, foreground, background, list);
-    }
-
-    protected void updateMessage(JLabel label, String foreground, String background, ArrayList<String> message) {
         label.setAlignmentX(JLabel.CENTER);
-        if (null != foreground) {
-            label.setForeground(Color.color(foreground));
-        }
-        if (null != background) {
-            label.setBackground(Color.color(background));
-        }
-        label.setText(String.join(System.lineSeparator(), message));
+        label.setForeground(Color.color(Color.COLOR_ERROR));
+        label.setText(ex.getMessage());
         label.setVisible(true);
         label.repaint();
     }
 
-    protected void displayErrors(JLabel label, ArrayList<String> errors, String defaultMessage) {
+    protected void showWarning(JLabel label, String message) {
+        label.setAlignmentX(JLabel.CENTER);
+        label.setForeground(Color.color(Color.COLOR_WARNING));
+        label.setText(message);
+        label.setVisible(true);
+        label.repaint();
+    }
+
+    protected void showSuccess(JLabel label, String message) {
+        label.setAlignmentX(JLabel.CENTER);
+        label.setForeground(Color.color(Color.COLOR_OK));
+        label.setText(message);
+        label.setVisible(true);
+        label.repaint();
+    }
+
+    protected void handleErrors(JLabel label, ArrayList<String> errors, String successMessage) {
         if (errors.isEmpty()) {
-            this.updateMessage(label, Color.COLOR_OK, defaultMessage);
+            this.showSuccess(label, successMessage);
 
             return;
         }
 
-        this.updateMessage(label, Color.COLOR_WARNING, errors);
+        label.setAlignmentX(JLabel.CENTER);
+        label.setForeground(Color.color(Color.COLOR_ERROR));
+        label.setText(String.join(System.lineSeparator(), errors));
+        label.setVisible(true);
+        label.repaint();
     }
 }
